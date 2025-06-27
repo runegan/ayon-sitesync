@@ -42,7 +42,7 @@ class RootSubmodel(BaseSettingsModel):
     )
 
     path: str = Field(
-        "c:/projects_local",
+        "~/BCCM_Ayon",
         title="Path",
         scope=["site"],
     )
@@ -51,7 +51,7 @@ class RootSubmodel(BaseSettingsModel):
 default_roots = [
     RootSubmodel(
         name="work",
-        path="C:/projects_local",
+        path="~/BCCM_Ayon",
     )
 ]
 

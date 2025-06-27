@@ -799,7 +799,7 @@ class SiteSyncAddon(AYONAddon, ITrayAddon, IPluginPaths):
         local_project_settings = sitesync_settings["local_setting"]
         if site_name == "local":
             for root_info in local_project_settings["local_roots"]:
-                roots[root_info["name"]] = root_info["path"]
+                roots[root_info["name"]] = os.path.expanduser(root_info["path"])
 
         return roots
 
