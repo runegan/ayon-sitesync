@@ -53,16 +53,6 @@ class CopyLastPublishedWorkfile(PreLaunchHook):
             self.log.debug("Sync server module is not enabled or available")
             return
 
-        # Check there is no workfile available
-        last_workfile = self.data.get("last_workfile_path")
-        if os.path.exists(last_workfile):
-            self.log.debug(
-                "Last workfile exists. Skipping {} process.".format(
-                    self.__class__.__name__
-                )
-            )
-            return
-
         host_name = self.application.host_name
 
         host_addon = self.addons_manager.get_host_addon(host_name)
@@ -131,6 +121,24 @@ class CopyLastPublishedWorkfile(PreLaunchHook):
         if not workfile_representation:
             self.log.info("Couldn't find published workfile representation")
             return
+
+        # Check there is a local workfile available
+        last_workfile = self.data.get("last_workfile_path")
+        if os.path.exists(last_workfile):
+            self.log.debug(
+                "Last workfile exists. Checking if it is the latest version..."
+            )
+            if self._last_workfile_is_latest(
+                last_workfile, workfile_representation
+            ):
+                self.log.debug(
+                    "Last workfile is the latest version. Skipping copy."
+                )
+                return
+            else:
+                self.log.debug(
+                    "Last workfile is not the latest version. Proceeding with copy."
+                )
 
         max_retries = int(
             sitesync_addon.sync_project_settings
@@ -224,3 +232,25 @@ class CopyLastPublishedWorkfile(PreLaunchHook):
             if ext in workfile_extensions:
                 return representation_entity
         return None
+
+    def _last_workfile_is_latest(
+        self, last_workfile, published_representation
+    ):
+        """Check if the last workfile is the latest version."""
+        # Compare the last workfile with the published representation
+        published_workfile_version = published_representation["context"]["version"]
+
+        # Extract the version from the last workfile path using regex
+        import re
+        version_pattern = r"v(\d+)"
+        match = re.search(version_pattern, last_workfile)
+
+        if not match:
+            self.log.warning(
+                f"Could not extract version from last workfile path: {last_workfile}"
+            )
+            return False
+
+        last_workfile_version = int(match.group(1))
+        # If the last workfile version is greater than or equal to the published version, it's the latest
+        return last_workfile_version >= published_workfile_version
