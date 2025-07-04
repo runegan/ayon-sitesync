@@ -190,7 +190,7 @@ class CopyLastPublishedWorkfile(PreLaunchHook):
         # Keep source filepath for further path conformation
         self.data["source_filepath"] = last_published_workfile_path
 
-        self.data["env"]["AYON_LAST_WORKFILE"] = last_published_workfile_path
+        self.data["env"]["AYON_LAST_WORKFILE"] = local_workfile_path
 
     def _get_last_published_workfile_representation(self,
         project_name, folder_id, task_id, workfile_extensions
